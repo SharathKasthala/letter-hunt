@@ -89,6 +89,9 @@ export default function App() {
           />
         )}
       </main>
+      <footer className="py-5 text-center text-sm text-muted">
+        Built with <span role="img" aria-label="love">❤️</span> by Sharath Chandra
+      </footer>
     </div>
   );
 }
