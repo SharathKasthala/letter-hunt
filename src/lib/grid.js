@@ -1,3 +1,15 @@
+const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+// Letters that are easy to confuse with each other
+const LOOK_ALIKES = {
+  R: ["P", "B", "K"], P: ["R", "B", "F"], B: ["R", "P", "E"],
+  E: ["F", "B"], F: ["E", "P", "T"], O: ["Q", "D", "C", "G"],
+  Q: ["O", "G"], C: ["G", "O"], G: ["C", "O", "Q"], D: ["O", "B"],
+  M: ["N", "W"], N: ["M", "H"], W: ["M", "V"], I: ["L", "T", "J"],
+  L: ["I", "T"], T: ["I", "L"], H: ["N"], K: ["R", "X"],
+  X: ["K", "Y"], V: ["W", "U", "Y"], U: ["V"],
+};
+
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 // 7×7 on phones, 8×8 on bigger screens
@@ -6,40 +18,32 @@ export function currentGridSize() {
   return window.matchMedia("(max-width: 639px)").matches ? 7 : 8;
 }
 
-// A new target from the symbol set, never the same as the last one
-export function pickTarget(set, previous) {
+// A new target, never the same as the last one
+export function pickTarget(previous) {
   let t;
   do {
-    t = pick(set.targets);
+    t = pick(ALPHABET);
   } while (t === previous);
   return t;
 }
 
-// A distractor: a symbol, a look-alike, or another random target character.
-// It is never the target itself.
-export function randomDistractor(target, set, difficulty) {
-  const symbolRate = difficulty.symbolRate[set.id] ?? 0;
-  if (Math.random() < symbolRate) {
-    const lookSymbols = set.symbolLookAlikes[target];
-    if (lookSymbols && Math.random() < difficulty.lookAlikeRate) return pick(lookSymbols);
-    return pick(set.symbols);
-  }
-
-  // Characters with few look-alikes get them less often,
-  // so the grid doesn't fill up with one repeated character
-  const similar = set.lookAlikes[target];
+// A non-target letter (or "?") based on the difficulty settings
+export function randomDistractor(target, difficulty) {
+  if (Math.random() < difficulty.questionRate) return "?";
+  const similar = LOOK_ALIKES[target];
+  // Letters with few look-alikes (like U, only V) get them less often,
+  // so the grid doesn't fill up with one repeated letter
   const rate = similar ? difficulty.lookAlikeRate * Math.min(1, similar.length / 3) : 0;
   if (similar && Math.random() < rate) return pick(similar);
-
-  let c;
+  let l;
   do {
-    c = pick(set.targets);
-  } while (c === target);
-  return c;
+    l = pick(ALPHABET);
+  } while (l === target);
+  return l;
 }
 
 // One target in a random cell, everything else a distractor
-export function buildGrid(target, size, set, difficulty) {
+export function buildGrid(target, size, difficulty) {
   const total = size * size;
   const targetIndex = Math.floor(Math.random() * total);
   const cells = [];
@@ -47,7 +51,7 @@ export function buildGrid(target, size, set, difficulty) {
     const isTarget = i === targetIndex;
     cells.push({
       id: i,
-      letter: isTarget ? target : randomDistractor(target, set, difficulty),
+      letter: isTarget ? target : randomDistractor(target, difficulty),
       isTarget,
       phase: "shown", // shown | out (fading away) | in (fading back)
       until: 0,
@@ -59,14 +63,14 @@ export function buildGrid(target, size, set, difficulty) {
 
 // Advance the fade cycle: finish fades that are due, then start new ones
 // so roughly `changeRate` of the cells are changing at any moment.
-export function stepFades(cells, target, set, difficulty, now) {
+export function stepFades(cells, target, difficulty, now) {
   let changed = false;
   const next = cells.map((c) => {
     if (c.phase === "out" && now >= c.until) {
       changed = true;
       return {
         ...c,
-        letter: randomDistractor(target, set, difficulty),
+        letter: randomDistractor(target, difficulty),
         phase: "in",
         until: now + c.fadeMs,
       };

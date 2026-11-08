@@ -1,12 +1,11 @@
 import { DIFFICULTIES } from "../lib/difficulty";
-import { SYMBOL_SETS } from "../lib/symbols";
 
 const TITLE = [
   [["L"], ["E"], ["T", "dim"], ["T"], ["E"], ["R"]],
   [["H"], ["U", "hot"], ["N"], ["T"]],
 ];
 
-export default function StartScreen({ setId, onSelectSet, difficultyId, onSelect, bestFor, onPlay }) {
+export default function StartScreen({ difficultyId, onSelect, bests, onPlay }) {
   return (
     <div className="flex flex-col items-center gap-8 sm:gap-10 py-6 sm:py-10">
       {/* Title spelled in grid tiles */}
@@ -31,30 +30,9 @@ export default function StartScreen({ setId, onSelectSet, difficultyId, onSelect
       </div>
 
       <p className="max-w-md text-center text-base sm:text-lg leading-relaxed text-soft">
-        Find the target before the timer runs out. Each find resets the clock and
+        Find the letter before the timer runs out. Each find resets the clock and
         reshuffles the grid.
       </p>
-
-      {/* Mode switch: letters or numbers */}
-      <div role="group" aria-label="Mode" className="flex p-1 rounded-lg bg-board border border-line">
-        {Object.values(SYMBOL_SETS).map((s) => {
-          const on = s.id === setId;
-          return (
-            <button
-              key={s.id}
-              type="button"
-              aria-pressed={on}
-              onClick={() => onSelectSet(s.id)}
-              className={[
-                "min-w-[132px] h-11 px-5 rounded-md text-[15px] font-bold cursor-pointer transition-colors",
-                on ? "bg-text text-ink" : "text-soft hover:text-text",
-              ].join(" ")}
-            >
-              {s.name}
-            </button>
-          );
-        })}
-      </div>
 
       {/* Difficulty picker */}
       <div className="w-full max-w-3xl flex flex-col items-center gap-5">
@@ -63,7 +41,7 @@ export default function StartScreen({ setId, onSelectSet, difficultyId, onSelect
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {DIFFICULTIES.map((d) => {
               const on = d.id === difficultyId;
-              const best = bestFor(d.id);
+              const best = bests[d.id];
               return (
                 <button
                   key={d.id}
@@ -100,8 +78,8 @@ export default function StartScreen({ setId, onSelectSet, difficultyId, onSelect
       {/* How to play */}
       <ol className="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         {[
-          "Spot the target shown above the grid: a letter or a number.",
-          "The grid keeps changing while you look. The target stays put.",
+          "Spot the target letter shown above the grid.",
+          "Letters keep changing while you look. The target stays put.",
           "Find them all in a row. Run out of time and you start over.",
         ].map((text, i) => (
           <li key={i} className="bg-board rounded-md px-5 py-4 flex gap-3.5 items-start">

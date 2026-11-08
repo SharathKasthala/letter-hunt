@@ -1,4 +1,4 @@
-export default function Header({ modeName, difficultyName, score, muted, onToggleMute, onHome }) {
+export default function Header({ difficultyName, score, muted, onToggleMute, onHome }) {
   return (
     <header className="flex items-center justify-between gap-4 px-4 sm:px-8 py-3 sm:py-5">
       <button
@@ -11,10 +11,7 @@ export default function Header({ modeName, difficultyName, score, muted, onToggl
 
       <div className="flex items-center gap-4 sm:gap-6">
         {difficultyName && (
-          <p className="text-sm sm:text-[15px] font-medium">
-            {difficultyName}
-            {modeName && <span className="text-muted font-normal"> {modeName.toLowerCase()}</span>}
-          </p>
+          <p className="text-sm sm:text-[15px] font-medium">{difficultyName}</p>
         )}
         {score !== null && (
           <p className="hidden sm:block text-[15px] text-muted">
