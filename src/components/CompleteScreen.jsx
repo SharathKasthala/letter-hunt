@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
 
-export default function CompleteScreen({ difficulty, result, onPlayAgain, onMenu }) {
+export default function CompleteScreen({ symbolSet, difficulty, result, onPlayAgain, onMenu }) {
   useEffect(() => {
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
     if (reduced) return;
@@ -26,7 +26,7 @@ export default function CompleteScreen({ difficulty, result, onPlayAgain, onMenu
             <span key={i} className="w-6 sm:w-7 h-1.5 rounded-full bg-miss" />
           ))}
         </div>
-        <p className="text-[15px] text-muted">{difficulty.name}</p>
+        <p className="text-[15px] text-muted">{difficulty.name} {symbolSet.name.toLowerCase()}</p>
         <h1 className="text-[44px] sm:text-[64px] font-black tracking-tight leading-none">
           Challenge complete
         </h1>
@@ -47,7 +47,7 @@ export default function CompleteScreen({ difficulty, result, onPlayAgain, onMenu
           <dd className="text-xl font-black">{result.total.toLocaleString()}</dd>
         </div>
         <div className="flex justify-between py-3">
-          <dt className="text-[15px] text-[#a3a5ab]">{difficulty.name} best</dt>
+          <dt className="text-[15px] text-[#a3a5ab]">{difficulty.name} {symbolSet.name.toLowerCase()} best</dt>
           <dd className="text-[15px] font-bold">{result.best.toLocaleString()}</dd>
         </div>
       </dl>

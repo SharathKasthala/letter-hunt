@@ -2,15 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { buildGrid, currentGridSize, pickTarget, stepFades } from "../lib/grid";
 import { POINTS_PER_FIND, POINTS_PER_SECOND_LEFT } from "../lib/difficulty";
 import { sfx } from "../lib/sound";
+import { spokenName } from "../lib/symbols";
 
-function newRound(previousTarget, difficulty) {
+function newRound(previousTarget, set, difficulty) {
   const size = currentGridSize();
-  const target = pickTarget(previousTarget);
-  return { target, size, cells: buildGrid(target, size, difficulty) };
+  const target = pickTarget(set, previousTarget);
+  return { target, size, cells: buildGrid(target, size, set, difficulty) };
 }
 
-export default function GameScreen({ difficulty, onScore, onComplete, onRetry, onMenu }) {
-  const [round, setRound] = useState(() => newRound(null, difficulty));
+export default function GameScreen({ symbolSet, difficulty, onScore, onComplete, onRetry, onMenu }) {
+  const [round, setRound] = useState(() => newRound(null, symbolSet, difficulty));
   const [finds, setFinds] = useState(0);
   const [points, setPoints] = useState({ findPoints: 0, speedBonus: 0 });
   const [status, setStatus] = useState("playing"); // playing | timeup | done
@@ -55,12 +56,12 @@ export default function GameScreen({ difficulty, onScore, onComplete, onRetry, o
     if (status !== "playing") return;
     const id = setInterval(() => {
       setRound((r) => {
-        const cells = stepFades(r.cells, r.target, difficulty, performance.now());
+        const cells = stepFades(r.cells, r.target, symbolSet, difficulty, performance.now());
         return cells === r.cells ? r : { ...r, cells };
       });
     }, 100);
     return () => clearInterval(id);
-  }, [status, difficulty]);
+  }, [status, symbolSet, difficulty]);
 
   function handleTap(cell) {
     if (status !== "playing") return;
@@ -91,7 +92,7 @@ export default function GameScreen({ difficulty, onScore, onComplete, onRetry, o
     }
 
     // Next round: new target, fresh grid, full timer
-    setRound(newRound(round.target, difficulty));
+    setRound(newRound(round.target, symbolSet, difficulty));
     roundStartRef.current = performance.now();
     lastTickRef.current = null;
     setShake(null);
@@ -110,7 +111,7 @@ export default function GameScreen({ difficulty, onScore, onComplete, onRetry, o
         <p className="text-sm text-muted">Find</p>
         <div
           role="img"
-          aria-label={`Target letter ${round.target}`}
+          aria-label={`Target ${symbolSet.noun} ${round.target}`}
           className="w-[72px] h-[72px] sm:w-[76px] sm:h-[76px] rounded border-2 border-text bg-panel flex items-center justify-center text-[44px] sm:text-5xl font-bold"
         >
           {round.target}
@@ -154,7 +155,7 @@ export default function GameScreen({ difficulty, onScore, onComplete, onRetry, o
                   type="button"
                   disabled={status !== "playing"}
                   onClick={() => handleTap(cell)}
-                  aria-label={cell.letter === "?" ? "question mark" : cell.letter}
+                  aria-label={spokenName(cell.letter)}
                   className={[
                     "grid-cell aspect-square rounded-sm bg-panel text-text font-medium",
                     "flex items-center justify-center select-none leading-none",

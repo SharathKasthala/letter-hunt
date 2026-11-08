@@ -1,18 +1,25 @@
 # Letter Hunt
 
-A fast-paced letter-finding game. Spot the target letter in a shifting grid before the timer runs out, and find enough in a row to complete the challenge.
+A fast-paced letter- and number-finding game. Spot the target in a shifting grid before the timer runs out, and find enough in a row to complete the challenge.
 
 **Live demo:** [add your Vercel link here]
 
 ## How to play
 
-1. Choose a difficulty: Beginner, Intermediate, or Advanced.
-2. Find the target letter shown above the grid and tap it.
+1. Choose a mode (Letters or Numbers) and a difficulty: Beginner, Intermediate, or Advanced.
+2. Find the target shown above the grid and tap it.
 3. Each find resets the timer and reshuffles the grid with a new target.
-4. Letters around the target keep fading and changing while you look. The target never moves or fades.
+4. Characters around the target keep fading and changing while you look. The target never moves or fades.
 5. Find enough targets in a row to win. If the timer runs out, your progress resets to zero.
 
 Wrong taps cost nothing, but the timer speeds up as it runs down.
+
+## Modes
+
+- **Letters:** find a letter from A to Z among look-alikes such as R/P/B and O/Q/D.
+- **Numbers:** find a digit from 0 to 9 among look-alikes such as 6/9/0/8, 3/5/8 and 1/7, plus symbol distractors (! ? $ % & # @ * + =). Some symbols mimic digits: ! for 1, $ for 5, & for 8, @ for 0 and 9.
+
+Personal bests are saved separately for each mode and difficulty.
 
 ## Difficulties
 
@@ -22,7 +29,8 @@ Wrong taps cost nothing, but the timer speeds up as it runs down.
 | Time per target | 12 s | 10 s | 7 s |
 | Letters changing at once | about 1 in 10 | about 1 in 5 | about 1 in 3 |
 | Look-alike letters (R/P/B, O/Q/D) | Rare | Some | Many |
-| "?" distractor cells | None | A few | More |
+| Symbol distractors (Letters: "?") | None | A few | More |
+| Symbol distractors (Numbers) | Some | More | Many |
 
 ## Features
 
@@ -77,6 +85,7 @@ src/
     CompleteScreen.jsx    results and confetti
   lib/
     difficulty.js         all tuning: targets, timing, change rates, scoring
+    symbols.js            the Letters and Numbers sets: characters, look-alikes, symbols
     grid.js               grid building, look-alike letters, fading letters
     sound.js              synthesized sound effects
     storage.js            personal bests and mute setting
@@ -84,7 +93,7 @@ src/
 
 ## Tuning the game
 
-All difficulty and scoring values live in `src/lib/difficulty.js`, so you can rebalance the game without touching the game logic.
+All difficulty and scoring values live in `src/lib/difficulty.js`, and each mode's characters and look-alikes live in `src/lib/symbols.js`, so you can rebalance the game or add a new mode without touching the game logic.
 
 ## Roadmap
 

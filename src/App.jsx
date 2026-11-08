@@ -4,11 +4,13 @@ import GameScreen from "./components/GameScreen";
 import CompleteScreen from "./components/CompleteScreen";
 import Header from "./components/Header";
 import { DEFAULT_DIFFICULTY, getDifficulty } from "./lib/difficulty";
+import { DEFAULT_SET, getSymbolSet } from "./lib/symbols";
 import { loadBests, saveBests } from "./lib/storage";
 import { isMuted, setMuted, sfx, unlockAudio } from "./lib/sound";
 
 export default function App() {
   const [screen, setScreen] = useState("start"); // start | playing | complete
+  const [setId, setSetId] = useState(DEFAULT_SET);
   const [difficultyId, setDifficultyId] = useState(DEFAULT_DIFFICULTY);
   const [bests, setBests] = useState(loadBests);
   const [score, setScore] = useState(0);
@@ -17,6 +19,12 @@ export default function App() {
   const [muted, setMutedState] = useState(isMuted);
 
   const difficulty = getDifficulty(difficultyId);
+  const symbolSet = getSymbolSet(setId);
+
+  // Letters keep their original keys ("intermediate") so earlier bests still count;
+  // numbers are stored as "numbers-intermediate".
+  const bestKey = (dId, sId = setId) => (sId === "letters" ? dId : `${sId}-${dId}`);
+  const bestFor = (dId) => bests[bestKey(dId)];
 
   function startGame() {
     unlockAudio();
@@ -28,10 +36,11 @@ export default function App() {
 
   function handleComplete({ findPoints, speedBonus }) {
     const total = findPoints + speedBonus;
-    const previous = bests[difficulty.id] || 0;
+    const key = bestKey(difficulty.id);
+    const previous = bests[key] || 0;
     const newBest = total > previous;
     if (newBest) {
-      const updated = { ...bests, [difficulty.id]: total };
+      const updated = { ...bests, [key]: total };
       setBests(updated);
       saveBests(updated);
     }
@@ -52,6 +61,7 @@ export default function App() {
   return (
     <div className="min-h-full flex flex-col">
       <Header
+        modeName={playing ? symbolSet.name : null}
         difficultyName={playing ? difficulty.name : null}
         score={playing ? score : null}
         muted={muted}
@@ -62,9 +72,11 @@ export default function App() {
       <main className="flex-1 w-full max-w-5xl mx-auto px-3 sm:px-6 flex flex-col">
         {screen === "start" && (
           <StartScreen
+            setId={setId}
+            onSelectSet={setSetId}
             difficultyId={difficultyId}
             onSelect={setDifficultyId}
-            bests={bests}
+            bestFor={bestFor}
             onPlay={startGame}
           />
         )}
@@ -72,6 +84,7 @@ export default function App() {
         {playing && (
           <GameScreen
             key={runKey}
+            symbolSet={symbolSet}
             difficulty={difficulty}
             onScore={setScore}
             onComplete={handleComplete}
@@ -82,6 +95,7 @@ export default function App() {
 
         {screen === "complete" && result && (
           <CompleteScreen
+            symbolSet={symbolSet}
             difficulty={difficulty}
             result={result}
             onPlayAgain={startGame}
@@ -89,6 +103,7 @@ export default function App() {
           />
         )}
       </main>
+
       <footer className="py-5 text-center text-sm text-muted">
         Built with <span role="img" aria-label="love">❤️</span> by Sharath Chandra
       </footer>
